@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -11,8 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { MessageCircle, Settings, HelpCircle, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { HelpCircle, Plus, Settings } from "lucide-react";
 import { useState } from "react";
 
 export function AppSidebar() {

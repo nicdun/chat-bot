@@ -2,12 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useToast } from "@/hooks/use-toast";
 import { useChat } from "@ai-sdk/react";
-import { Send } from "lucide-react";
+import { OctagonX, Send } from "lucide-react";
+import { Message } from "./message";
 import { Preview } from "./preview";
-import { LoadingMessage, Message } from "./message";
-import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
+import { LoadingMessage } from "./loading";
 
 export default function Chat() {
   const { toast } = useToast();
@@ -41,7 +42,7 @@ export default function Chat() {
   });
 
   return (
-    <div className="flex flex-col min-w-0 h-[calc(100dvh-28px)] bg-background items-center">
+    <div className="flex flex-col min-w-0 h-[calc(100dvh-28px)] px-2 pt-2 md:px-0 md:pt-0 bg-background items-center">
       <div
         ref={containerObserverRef}
         className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4 w-full md:max-w-3xl"
@@ -66,18 +67,44 @@ export default function Chat() {
             placeholder="Type your message..."
             value={input}
             onChange={handleInputChange}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+
+                if (isLoading) {
+                  toast({
+                    title: "Error",
+                    description:
+                      "Please wait for the current message to finish processing.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
+                handleSubmit(e);
+              }
+            }}
             disabled={isLoading}
-            className="bg-secondary grow resize-none max-h-64 min-h-20 rounded-none rounded-se-xl rounded-ss-xl"
+            className="bg-secondary grow resize-none max-h-64 min-h-28 rounded-none rounded-se-xl rounded-ss-xl"
             rows={3}
           />
-          <Button
-            size="icon"
-            type="submit"
-            className="absolute right-2 bottom-2 rounded-full"
-            disabled={input.trim() === "" || isLoading}
-          >
-            <Send className="h-5 w-5" />
-          </Button>
+          {isLoading ? (
+            <Button
+              size="icon"
+              onClick={stop}
+              className="absolute right-4 bottom-4 rounded-full"
+            >
+              <OctagonX className="h-5 w-5" />
+            </Button>
+          ) : (
+            <Button
+              size="icon"
+              type="submit"
+              className="absolute right-4 bottom-4 rounded-full"
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </form>
     </div>

@@ -3,7 +3,8 @@
 [x] setup google gemini api
 [x] create next js frontend
 [x] build basic chat layout and chat interaction (markdown)
-[] implement loading indicator with framer motion or lottie
+[x] stop generating button
+[x] implement loading indicator with framer motion
 [] implement routing and chat thread mechanism
 [] store messages locally and restore them from indexDB (dexi.js)
 [] try to implement session auth in fast api backend
