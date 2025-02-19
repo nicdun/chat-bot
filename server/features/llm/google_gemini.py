@@ -3,7 +3,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from google import genai
 from model import ChatResponse, Input
 
-from config import get_env
+from shared.config import get_env
 
 
 template = """

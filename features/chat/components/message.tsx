@@ -38,7 +38,7 @@ export function Message({ message }: { message: Message }) {
       }`}
     >
       {message.role === "assistant" && (
-        <div className="pt-2.5">
+        <div className="pt-[5px]">
           <SparklesIcon className="h-4 w-4" />
         </div>
       )}

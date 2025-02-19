@@ -1,5 +1,6 @@
 "use client";
 
+import { db } from "@/app/shared/db";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -14,18 +15,29 @@ import {
 } from "@/components/ui/sidebar";
 import { HelpCircle, Plus, Settings } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router";
+import { v4 as uuidv4 } from "uuid";
 
 export function AppSidebar() {
   const [chats, setChats] = useState([
     { title: "Settings", icon: Settings, url: "/settings" },
     { title: "Help", icon: HelpCircle, url: "/help" },
   ]);
+  const navigate = useNavigate();
 
   const handleNewChat = () => {
-    // TODO: Implement new chat creation logic
-    console.log("Creating new chat");
-    // Example of how you might add a new chat
-    // setChats([...chats, { title: `Chat ${chats.length + 1}`, icon: MessageCircle, url: `/chat/${chats.length + 1}` }]);
+    const threadId = uuidv4();
+
+    db.threads
+      .add({
+        id: threadId,
+        created_at: new Date(),
+        title: threadId,
+        updated_at: new Date(),
+      })
+      .then(() => {
+        navigate(`/chat/${threadId}`);
+      });
   };
 
   return (

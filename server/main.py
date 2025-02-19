@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.logger import logger
 import logging
-from llm import handle_conversation, handle_google_api
+from features.llm.google_gemini import handle_conversation, handle_google_api
 from fastapi.middleware.cors import CORSMiddleware
 from model import ChatResponse, Input
 import uuid

@@ -6,14 +6,18 @@ import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useToast } from "@/hooks/use-toast";
 import { useChat } from "@ai-sdk/react";
 import { OctagonX, Send } from "lucide-react";
+import { Preview } from "../../../components/preview";
+import { LoadingMessage } from "../../../components/loading";
 import { Message } from "./message";
-import { Preview } from "./preview";
-import { LoadingMessage } from "./loading";
+import { useEffect } from "react";
+import { db } from "@/app/shared/db";
+import { useLiveQuery } from "dexie-react-hooks";
 
-export default function Chat() {
+export default function Chat({ threadId }: { threadId: string }) {
   const { toast } = useToast();
   const [containerObserverRef, messagesEndRef] = useScrollToBottom();
-
+  const threads = useLiveQuery(() => db.threads.toArray());
+  const messagesIndexDb = useLiveQuery(() => db.messages.toArray());
   const {
     messages,
     setMessages,
@@ -40,6 +44,43 @@ export default function Chat() {
       }
     },
   });
+
+  useEffect(() => {
+    if (!threadId) {
+      return;
+    }
+
+    const messages =
+      messagesIndexDb?.filter((m) => m.threadId === threadId) || [];
+    const mappedMessages = messages.map((message) => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      createdAt: message.createdAt,
+    }));
+    setMessages(mappedMessages);
+  }, [threadId]);
+
+  useEffect(() => {
+    if (messages.length === 0) {
+      return;
+    }
+
+    async function saveMessages() {
+      const mappedMessages = messages.map((message) => ({
+        id: message.id,
+        createdAt: message.createdAt!,
+        role: message.role,
+        content: message.content,
+        threadId: threadId,
+      }));
+      // TODO: fix update messages
+      await db.messages.bulkAdd(mappedMessages);
+    }
+    saveMessages();
+  }, [messages]);
+
+  console.log(messages);
 
   return (
     <div className="flex flex-col min-w-0 h-[calc(100dvh-28px)] px-2 pt-2 md:px-0 md:pt-0 bg-background items-center">
