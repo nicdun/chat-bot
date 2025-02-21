@@ -1,7 +1,5 @@
 // db.ts
 import Dexie, { type EntityTable } from "dexie";
-import { v4 as uuidv4 } from "uuid";
-import { useRouter } from "next/router";
 
 interface Thread {
   id: string;
@@ -33,5 +31,5 @@ db.version(1).stores({
   messages: "++id, createdAt, role, content, threadId, model, status",
 });
 
-export type { Thread, Message };
 export { db };
+export type { Message, Thread };

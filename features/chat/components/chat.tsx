@@ -1,23 +1,27 @@
 "use client";
 
+import { db } from "@/app/shared/index-db-adapter";
+import { useData } from "@/app/shared/index-db-provider";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useToast } from "@/hooks/use-toast";
 import { useChat } from "@ai-sdk/react";
 import { OctagonX, Send } from "lucide-react";
-import { Preview } from "../../../components/preview";
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { LoadingMessage } from "../../../components/loading";
+import { upsertMessages } from "../db/messages";
 import { Message } from "./message";
-import { useEffect } from "react";
-import { db } from "@/app/shared/db";
-import { useLiveQuery } from "dexie-react-hooks";
+import { Preview } from "./preview";
+import { addThread } from "../db/threads";
 
-export default function Chat({ threadId }: { threadId: string }) {
+export default function Chat({ threadId }: { threadId?: string }) {
   const { toast } = useToast();
+  const [threadIdState, setThreadIdState] = useState<string>("");
   const [containerObserverRef, messagesEndRef] = useScrollToBottom();
-  const threads = useLiveQuery(() => db.threads.toArray());
-  const messagesIndexDb = useLiveQuery(() => db.messages.toArray());
+  const { messages: messagesIndexDb } = useData();
+
   const {
     messages,
     setMessages,
@@ -46,20 +50,27 @@ export default function Chat({ threadId }: { threadId: string }) {
   });
 
   useEffect(() => {
-    if (!threadId) {
+    if (threadId) setThreadIdState(threadId);
+  }, [threadId]);
+
+  useEffect(() => {
+    if (!threadIdState || messagesIndexDb?.length === 0) {
       return;
     }
 
     const messages =
-      messagesIndexDb?.filter((m) => m.threadId === threadId) || [];
-    const mappedMessages = messages.map((message) => ({
-      id: message.id,
-      role: message.role,
-      content: message.content,
-      createdAt: message.createdAt,
-    }));
+      messagesIndexDb?.filter((m) => m.threadId === threadIdState) || [];
+    const mappedMessages = messages
+      .map((message) => ({
+        id: message.id,
+        role: message.role,
+        content: message.content,
+        createdAt: message.createdAt,
+      }))
+      .sort((a, b) => a.createdAt!.getTime() - b.createdAt!.getTime());
+
     setMessages(mappedMessages);
-  }, [threadId]);
+  }, [threadIdState, messagesIndexDb]);
 
   useEffect(() => {
     if (messages.length === 0) {
@@ -72,23 +83,41 @@ export default function Chat({ threadId }: { threadId: string }) {
         createdAt: message.createdAt!,
         role: message.role,
         content: message.content,
-        threadId: threadId,
+        threadId: threadIdState,
       }));
-      // TODO: fix update messages
-      await db.messages.bulkAdd(mappedMessages);
+      await upsertMessages(mappedMessages);
     }
     saveMessages();
   }, [messages]);
 
-  console.log(messages);
+  const handleSubmitForm = async (e: Event) => {
+    if (!threadIdState) {
+      await createThread();
+    }
+    handleSubmit(e);
+  };
+
+  const createThread = async () => {
+    const thread = {
+      id: uuidv4(),
+      created_at: new Date(),
+      title: input.substring(0, 50),
+      updated_at: new Date(),
+    };
+
+    await addThread(thread);
+
+    setThreadIdState(newThreadId);
+    window.history.pushState({}, "", `/chat/${newThreadId}`);
+  };
 
   return (
-    <div className="flex flex-col min-w-0 h-[calc(100dvh-28px)] px-2 pt-2 md:px-0 md:pt-0 bg-background items-center">
+    <div className="flex flex-col min-w-0 h-[calc(100dvh-28px)] px-2 pt-2 md:pt-0 bg-background items-center">
       <div
         ref={containerObserverRef}
         className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4 w-full md:max-w-3xl"
       >
-        {messages.length === 0 && <Preview />}
+        {messages.length === 0 && <Preview></Preview>}
         {messages.map((message) => (
           <Message key={message.id} message={message} />
         ))}
@@ -100,7 +129,7 @@ export default function Chat({ threadId }: { threadId: string }) {
       </div>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmitForm}
         className="flex bg-background gap-2 w-full md:max-w-3xl"
       >
         <div className="relative w-full">
@@ -108,7 +137,7 @@ export default function Chat({ threadId }: { threadId: string }) {
             placeholder="Type your message..."
             value={input}
             onChange={handleInputChange}
-            onKeyDown={(e) => {
+            onKeyDown={async (e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
 
@@ -122,7 +151,7 @@ export default function Chat({ threadId }: { threadId: string }) {
                   return;
                 }
 
-                handleSubmit(e);
+                handleSubmitForm(e);
               }
             }}
             disabled={isLoading}

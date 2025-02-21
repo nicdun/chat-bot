@@ -1,5 +1,5 @@
-import { App } from "@/features/app";
+import { ChatRoot } from "@/features/chat/chat-root";
 
-export default async function Home() {
-  return <App />;
+export default async function App() {
+  return <ChatRoot />;
 }
