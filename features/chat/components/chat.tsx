@@ -7,25 +7,24 @@ import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useToast } from "@/hooks/use-toast";
 import { useChat } from "@ai-sdk/react";
 import { OctagonX, Send } from "lucide-react";
-import { useEffect, useState } from "react";
-
 import { LoadingMessage } from "../../../components/loading";
 import { upsertMessages } from "../db/messages";
 import { Message } from "./message";
+import { useEffect, useState } from "react";
+import { db } from "@/app/shared/db";
+import { useLiveQuery } from "dexie-react-hooks";
+import { upsertMessages } from "../db/messages";
+import { useNavigate } from "react-router";
 import { Preview } from "./preview";
-import { addThread } from "../db/threads";
+import { v4 as uuidv4 } from "uuid";
 
-export default function Chat({
-  threadId,
-  initialMessages,
-}: {
-  threadId?: string;
-  initialMessages?: [];
-}) {
+export default function Chat({ threadId }: { threadId?: string }) {
   const { toast } = useToast();
-  const [threadIdState, setThreadIdState] = useState<string>("");
+  const [threadIdState, setThreadIdState] = useState(null);
   const [containerObserverRef, messagesEndRef] = useScrollToBottom();
-
+  const threads = useLiveQuery(() => db.threads.toArray());
+  const messagesIndexDb = useLiveQuery(() => db.messages.toArray());
+  const navigate = useNavigate();
   const {
     messages,
     setMessages,
@@ -60,8 +59,28 @@ export default function Chat({
   });
 
   useEffect(() => {
-    if (threadId) setThreadIdState(threadId);
+    threadId && setThreadIdState(threadId);
   }, [threadId]);
+
+  useEffect(() => {
+    if (!threadIdState) {
+      return;
+    }
+
+    console.log(messagesIndexDb);
+    const messages =
+      messagesIndexDb?.filter((m) => m.threadId === threadIdState) || [];
+    const mappedMessages = messages
+      .map((message) => ({
+        id: message.id,
+        role: message.role,
+        content: message.content,
+        createdAt: message.createdAt,
+      }))
+      .sort((a, b) => a.createdAt!.getTime() - b.createdAt!.getTime());
+
+    setMessages(mappedMessages);
+  }, [threadIdState]);
 
   useEffect(() => {
     if (messages.length === 0) {
@@ -75,52 +94,30 @@ export default function Chat({
         role: message.role,
         content: message.content,
         threadId: threadIdState,
+        threadId: threadIdState,
       }));
+      // TODO: fix update messages
       await upsertMessages(mappedMessages);
     }
     saveMessages();
-  }, [messages, threadIdState]);
+  }, [messages]);
 
-  const handleSubmitForm: React.FormEventHandler<HTMLFormElement> = async (
-    e
-  ) => {
-    e.preventDefault();
+  const handleSubmitForm = async (e) => {
     if (!threadIdState) {
-      await createThread();
+      const newThreadId = uuidv4();
+
+      await db.threads.add({
+        id: newThreadId,
+        created_at: new Date(),
+        title: newThreadId,
+        updated_at: new Date(),
+      });
+
+      setThreadIdState(newThreadId);
+      window.history.pushState({}, "", `/chat/${newThreadId}`);
     }
+
     handleSubmit(e);
-  };
-
-  const createThread = async () => {
-    const thread: Thread = {
-      id: "", // Add a temporary id
-      created_at: new Date(),
-      title: input.substring(0, 50),
-      updated_at: new Date(),
-    };
-
-    const id = await addThread(thread);
-
-    setThreadIdState(id);
-    window.history.pushState({}, "", `/chat/${id}`);
-  };
-
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-
-      if (isLoading) {
-        toast({
-          title: "Error",
-          description:
-            "Please wait for the current message to finish processing.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      handleSubmitForm(e as unknown as React.FormEvent<HTMLFormElement>);
-    }
   };
 
   return (
@@ -142,6 +139,7 @@ export default function Chat({
 
       <form
         onSubmit={handleSubmitForm}
+        onSubmit={handleSubmitForm}
         className="flex bg-background gap-2 w-full md:max-w-3xl"
       >
         <div className="relative w-full">
@@ -149,7 +147,23 @@ export default function Chat({
             placeholder="Type your message..."
             value={input}
             onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
+            onKeyDown={async (e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+
+                if (isLoading) {
+                  toast({
+                    title: "Error",
+                    description:
+                      "Please wait for the current message to finish processing.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
+                handleSubmitForm(e);
+              }
+            }}
             disabled={isLoading}
             className="bg-secondary grow resize-none max-h-64 min-h-28 rounded-none rounded-se-xl rounded-ss-xl"
             rows={3}

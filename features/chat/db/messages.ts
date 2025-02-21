@@ -1,4 +1,4 @@
-import { db, Message } from "@/app/shared/index-db-adapter";
+import { db, Message } from "@/app/shared/db";
 
 export async function upsertMessages(messages: Message[]) {
   const existingMessages = await db.messages.bulkGet(messages.map((m) => m.id));
