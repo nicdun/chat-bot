@@ -24,6 +24,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useData } from "@/app/shared/index-db-provider";
+import { SidebarThemeToggle } from "./sidebar-theme-toggle";
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -46,14 +47,26 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel className="flex justify-between items-center">
             <h2 className="font-bold text-lg">nd.chat</h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleNewChat}
-              className="h-8 w-8 hover:cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+            <div>
+              <SidebarThemeToggle></SidebarThemeToggle>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleNewChat}
+                      className="h-8 w-8 hover:cursor-pointer"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Create new chat</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
@@ -113,7 +126,7 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <div> AUTH INFO </div>
+        {/* <div> AUTH INFO </div> */}
       </SidebarFooter>
     </Sidebar>
   );

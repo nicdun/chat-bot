@@ -3,8 +3,8 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { BrowserRouter, Route, Routes } from "react-router";
-import { ChatPage } from "./page";
-import { WelcomePage } from "./welcome-page";
+import { ChatPage } from "./chat-page";
+import { WelcomePage } from "./chat-welcome-page";
 import { DataProvider } from "@/app/shared/index-db-provider";
 
 export function ChatRoot() {

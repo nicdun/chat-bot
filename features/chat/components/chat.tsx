@@ -1,6 +1,5 @@
 "use client";
 
-import { db } from "@/app/shared/index-db-adapter";
 import { useData } from "@/app/shared/index-db-provider";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,18 +8,23 @@ import { useToast } from "@/hooks/use-toast";
 import { useChat } from "@ai-sdk/react";
 import { OctagonX, Send } from "lucide-react";
 import { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+
 import { LoadingMessage } from "../../../components/loading";
 import { upsertMessages } from "../db/messages";
 import { Message } from "./message";
 import { Preview } from "./preview";
 import { addThread } from "../db/threads";
 
-export default function Chat({ threadId }: { threadId?: string }) {
+export default function Chat({
+  threadId,
+  initialMessages,
+}: {
+  threadId?: string;
+  initialMessages?: [];
+}) {
   const { toast } = useToast();
   const [threadIdState, setThreadIdState] = useState<string>("");
   const [containerObserverRef, messagesEndRef] = useScrollToBottom();
-  const { messages: messagesIndexDb } = useData();
 
   const {
     messages,
@@ -28,8 +32,6 @@ export default function Chat({ threadId }: { threadId?: string }) {
     handleSubmit,
     handleInputChange,
     input,
-    setInput,
-    append,
     isLoading,
     stop,
   } = useChat({
@@ -38,6 +40,14 @@ export default function Chat({ threadId }: { threadId?: string }) {
     body: {
       model: "gemini-2.0-flash",
     },
+    initialMessages: initialMessages
+      ?.map((message) => ({
+        id: message.id,
+        role: message.role,
+        content: message.content,
+        createdAt: message.createdAt,
+      }))
+      .sort((a, b) => a.createdAt!.getTime() - b.createdAt!.getTime()),
     onError: (error) => {
       if (error.message.includes("Too many requests")) {
         toast({
@@ -52,25 +62,6 @@ export default function Chat({ threadId }: { threadId?: string }) {
   useEffect(() => {
     if (threadId) setThreadIdState(threadId);
   }, [threadId]);
-
-  useEffect(() => {
-    if (!threadIdState || messagesIndexDb?.length === 0) {
-      return;
-    }
-
-    const messages =
-      messagesIndexDb?.filter((m) => m.threadId === threadIdState) || [];
-    const mappedMessages = messages
-      .map((message) => ({
-        id: message.id,
-        role: message.role,
-        content: message.content,
-        createdAt: message.createdAt,
-      }))
-      .sort((a, b) => a.createdAt!.getTime() - b.createdAt!.getTime());
-
-    setMessages(mappedMessages);
-  }, [threadIdState, messagesIndexDb]);
 
   useEffect(() => {
     if (messages.length === 0) {
@@ -88,9 +79,12 @@ export default function Chat({ threadId }: { threadId?: string }) {
       await upsertMessages(mappedMessages);
     }
     saveMessages();
-  }, [messages]);
+  }, [messages, threadIdState]);
 
-  const handleSubmitForm = async (e: Event) => {
+  const handleSubmitForm: React.FormEventHandler<HTMLFormElement> = async (
+    e
+  ) => {
+    e.preventDefault();
     if (!threadIdState) {
       await createThread();
     }
@@ -98,17 +92,35 @@ export default function Chat({ threadId }: { threadId?: string }) {
   };
 
   const createThread = async () => {
-    const thread = {
-      id: uuidv4(),
+    const thread: Thread = {
+      id: "", // Add a temporary id
       created_at: new Date(),
       title: input.substring(0, 50),
       updated_at: new Date(),
     };
 
-    await addThread(thread);
+    const id = await addThread(thread);
 
-    setThreadIdState(newThreadId);
-    window.history.pushState({}, "", `/chat/${newThreadId}`);
+    setThreadIdState(id);
+    window.history.pushState({}, "", `/chat/${id}`);
+  };
+
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+
+      if (isLoading) {
+        toast({
+          title: "Error",
+          description:
+            "Please wait for the current message to finish processing.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      handleSubmitForm(e as unknown as React.FormEvent<HTMLFormElement>);
+    }
   };
 
   return (
@@ -137,23 +149,7 @@ export default function Chat({ threadId }: { threadId?: string }) {
             placeholder="Type your message..."
             value={input}
             onChange={handleInputChange}
-            onKeyDown={async (e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-
-                if (isLoading) {
-                  toast({
-                    title: "Error",
-                    description:
-                      "Please wait for the current message to finish processing.",
-                    variant: "destructive",
-                  });
-                  return;
-                }
-
-                handleSubmitForm(e);
-              }
-            }}
+            onKeyDown={handleKeyDown}
             disabled={isLoading}
             className="bg-secondary grow resize-none max-h-64 min-h-28 rounded-none rounded-se-xl rounded-ss-xl"
             rows={3}
