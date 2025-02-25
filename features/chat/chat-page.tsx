@@ -1,25 +1,45 @@
-import { db } from "@/app/shared/index-db-adapter";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import Chat from "@/features/chat/components/chat";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router";
+import { useChatContext } from "./context/chat-context";
+import { db } from "./db/index-db-adapter";
+
 export function ChatPage() {
   const { threadId } = useParams();
-  const [messages, setMessages] = useState(null);
+  const { setThreadId, setMessages } = useChatContext();
 
   useEffect(() => {
-    const loadMessagesFromIndexDb = async () => {
-      const messages = await db.messages.where({ threadId }).toArray();
-      setMessages(messages);
+    if (!threadId) {
+      return;
+    }
+
+    // Update thread ID in context
+    setThreadId(threadId);
+
+    const getInitialMessages = async () => {
+      const messages = await db.messages.toArray();
+
+      const mappedMessages = messages
+        .filter((message) => message.threadId === threadId)
+        .map((message) => ({
+          id: message.id,
+          role: message.role,
+          content: message.content,
+          createdAt: message.createdAt,
+        }))
+        .sort((a, b) => a.createdAt!.getTime() - b.createdAt!.getTime());
+
+      setMessages(mappedMessages);
     };
 
-    loadMessagesFromIndexDb();
-  }, []);
+    getInitialMessages();
+  }, [threadId]);
 
   return (
     <main className="flex-1 h-full flex flex-col">
       <SidebarTrigger />
-      <Chat threadId={threadId} initialMessages={messages} />
+      <Chat />
     </main>
   );
 }

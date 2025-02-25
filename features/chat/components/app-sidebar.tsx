@@ -1,7 +1,6 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/app/shared/db";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -23,6 +22,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { SidebarThemeToggle } from "../../../components/sidebar-theme-toggle";
+import { db } from "@/features/chat/db/index-db-adapter";
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -30,13 +31,6 @@ export function AppSidebar() {
   const threads = useLiveQuery(() => db.threads.toArray(), []);
 
   const handleNewChat = () => {
-    navigate(`/chat`);
-  };
-
-  const handleDeleteThread = async (threadId: string) => {
-    await db.threads.delete(threadId);
-    await db.messages.where("threadId").equals(threadId).delete();
-    navigate(`/chat`);
     navigate(`/chat`);
   };
 
@@ -52,50 +46,28 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel className="flex justify-between items-center">
             <h2 className="font-bold text-lg">nd.chat</h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleNewChat}
-              className="h-8 w-8 hover:cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+            <div>
+              <SidebarThemeToggle></SidebarThemeToggle>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleNewChat}
+                      className="h-8 w-8 hover:cursor-pointer"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Create new chat</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-1">
-              {threads?.map((thread) => (
-                <SidebarMenuItem
-                  key={thread.id}
-                  className={`rounded-md flex justify-between items-center p-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground truncate ${
-                    location.pathname === `/chat/${thread.id}`
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : ""
-                  }`}
-                >
-                  <SidebarMenuButton asChild>
-                    <Link to={`/chat/${thread.id}`} className="max-w-[80%]">
-                      <span className="truncate">{thread.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteThread(thread.id)}
-                          className="h-8 w-8 hover:cursor-pointer"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Delete Thread</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </SidebarMenuItem>
-              ))}
             <SidebarMenu className="gap-1">
               {threads?.map((thread) => (
                 <SidebarMenuItem
@@ -136,22 +108,6 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem key="Settings">
-            <SidebarMenuButton asChild>
-              <a href="/settings">
-                <Settings />
-                <span>Settings</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem key="Help">
-            <SidebarMenuButton asChild>
-              <a href="/help">
-                <HelpCircle />
-                <span>Help</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
           <SidebarMenuItem key="Settings">
             <SidebarMenuButton asChild>
               <a href="/settings">
