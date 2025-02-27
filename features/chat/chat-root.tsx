@@ -1,27 +1,29 @@
 "use client";
-import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { ChatPage } from "./chat-page";
 import { WelcomePage } from "./chat-welcome-page";
-import { DataProvider } from "@/app/shared/index-db-provider";
+import { ChatProvider } from "./context/chat-context";
+import { AppSidebar } from "@/features/chat/components/app-sidebar";
 
 export function ChatRoot() {
   return (
-    <DataProvider>
-      <BrowserRouter>
-        <SidebarProvider>
-          <div className="w-full flex">
+    <BrowserRouter>
+      <SidebarProvider>
+        <div className="w-full flex flex-col">
+          <div className="flex flex-1">
             <AppSidebar />
-            <Routes>
-              <Route path="chat" element={<WelcomePage />} />
-              <Route path="/chat/:threadId" element={<ChatPage />} />
-            </Routes>
+            <ChatProvider>
+              <Routes>
+                <Route path="chat" element={<WelcomePage />} />
+                <Route path="/chat/:threadId" element={<ChatPage />} />
+              </Routes>
+            </ChatProvider>
             <Toaster />
           </div>
-        </SidebarProvider>
-      </BrowserRouter>
-    </DataProvider>
+        </div>
+      </SidebarProvider>
+    </BrowserRouter>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/app/shared/index-db-adapter";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -23,13 +22,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useData } from "@/app/shared/index-db-provider";
-import { SidebarThemeToggle } from "./sidebar-theme-toggle";
+import { SidebarThemeToggle } from "../../../components/sidebar-theme-toggle";
+import { db } from "@/features/chat/db/index-db-adapter";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { threads } = useData();
+  const threads = useLiveQuery(() => db.threads.toArray(), []);
 
   const handleNewChat = () => {
     navigate(`/chat`);

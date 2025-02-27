@@ -13,6 +13,7 @@ const DataContext = createContext<DataProviderState>();
 export const DataProvider = ({ children }) => {
   const messages = useLiveQuery(() => db.messages.toArray(), []);
   const threads = useLiveQuery(() => db.threads.toArray(), []);
+
   return (
     <DataContext.Provider value={{ messages, threads }}>
       {children}
