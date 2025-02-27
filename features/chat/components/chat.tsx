@@ -9,11 +9,13 @@ import { LoadingMessage } from "../../../components/loading";
 import { useChatContext } from "../context/chat-context";
 import { Message } from "./message";
 import { Preview } from "./preview";
+import { useState } from "react";
+import { LlmInfoModal } from "./llm-info-modal";
 
 export default function Chat() {
   const { toast } = useToast();
   const [containerObserverRef, messagesEndRef] = useScrollToBottom();
-
+  const [isLlmInfoModalOpen, setIsLlmInfoModalOpen] = useState(false);
   const {
     messages,
     isLoading,
@@ -42,7 +44,11 @@ export default function Chat() {
       <div className="text-muted-foreground pb-1 text-center">
         Always check the sources! LLMs are not 100% accurate.{" "}
         <a
-          href=""
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            setIsLlmInfoModalOpen(true);
+          }}
           className="text-sidebar-foreground hover:underline hover:text-muted-foreground"
         >
           Learn more
@@ -97,6 +103,12 @@ export default function Chat() {
           )}
         </div>
       </form>
+
+      {/* LLM Information Modal */}
+      <LlmInfoModal
+        isOpen={isLlmInfoModalOpen}
+        onClose={() => setIsLlmInfoModalOpen(false)}
+      />
     </div>
   );
 }
