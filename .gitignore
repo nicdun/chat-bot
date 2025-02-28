@@ -5,3 +5,5 @@ chatbot/
 node_modules/
 .vscode/
 .next/
+
+.env
