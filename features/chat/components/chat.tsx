@@ -27,19 +27,21 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col min-w-0 h-[calc(100dvh-28px)] px-2 pt-2 md:pt-0 bg-background items-center">
-      <div
-        ref={containerObserverRef}
-        className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4 w-full md:max-w-3xl"
-      >
-        {messages.length === 0 && <Preview></Preview>}
-        {messages.map((message) => (
-          <Message key={message.id} message={message} />
-        ))}
-        <div />
-        {isLoading &&
-          messages.length > 0 &&
-          messages[messages.length - 1].role === "user" && <LoadingMessage />}
-        <div ref={messagesEndRef}></div>
+      <div className="flex-1 overflow-y-scroll pt-4 min-w-0 w-full">
+        <div
+          ref={containerObserverRef}
+          className="flex flex-col gap-6 md:max-w-3xl mx-auto"
+        >
+          {messages.length === 0 && <Preview></Preview>}
+          {messages.map((message) => (
+            <Message key={message.id} message={message} />
+          ))}
+          <div />
+          {isLoading &&
+            messages.length > 0 &&
+            messages[messages.length - 1].role === "user" && <LoadingMessage />}
+          <div ref={messagesEndRef}></div>
+        </div>
       </div>
       <div className="text-muted-foreground pb-1 text-center">
         Always check the sources! LLMs are not 100% accurate.{" "}
