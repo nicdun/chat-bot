@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
 import { db } from "@/features/chat/db/index-db-adapter";
 import { useLiveQuery } from "dexie-react-hooks";
+import { createContext, useContext } from "react";
 import { Message, Thread } from "./index-db-adapter";
 
 interface DataProviderState {

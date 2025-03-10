@@ -5,8 +5,8 @@
 [x] build basic chat layout and chat interaction (markdown)
 [x] stop generating button
 [x] implement loading indicator with framer motion
-[] implement routing and chat thread mechanism
-[] store messages locally and restore them from indexDB (dexi.js)
+[x] implement routing and chat thread mechanism
+[x] store messages locally and restore them from indexDB (dexi.js)
 [] try to implement session auth in fast api backend
 [] containerize nextjs and fastapi backend
 [] deploy them both to vps (for testing)
