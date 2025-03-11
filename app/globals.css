@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @plugin 'tailwindcss-animate';
 
@@ -168,5 +168,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer base {
+  * {
+    scrollbar-color: hsl(var(--border)) transparent;
   }
 }
