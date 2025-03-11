@@ -175,4 +175,16 @@
   * {
     scrollbar-color: hsl(var(--border)) transparent;
   }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+  }
 }
