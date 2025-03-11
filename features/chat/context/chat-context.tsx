@@ -1,6 +1,6 @@
 "use client";
 import { useToast } from "@/hooks/use-toast";
-import { useChat } from "@ai-sdk/react";
+import { useChat, UseChatHelpers } from "@ai-sdk/react";
 import {
   ReactNode,
   createContext,
@@ -12,19 +12,21 @@ import { useNavigate } from "react-router";
 import { upsertMessages } from "../db/messages";
 import { addThread } from "../db/threads";
 
-type ChatContextType = {
-  messages: any[];
-  isLoading: boolean;
-  input: string;
+type ChatContextType = Pick<
+  UseChatHelpers,
+  | "messages"
+  | "isLoading"
+  | "input"
+  | "handleInputChange"
+  | "handleSubmit"
+  | "stop"
+  | "setInput"
+  | "setMessages"
+> & {
+  handleSubmitForm: UseChatHelpers["handleSubmit"];
   threadId: string | null;
-  handleInputChange: (e: any) => void;
-  handleSubmit: (e: any) => void;
-  handleSubmitForm: (e: any) => void;
-  stop: () => void;
-  setInput: (input: string) => void;
-  setMessages: (messages: any[]) => void;
   setThreadId: (id: string | null) => void;
-  resetChat: () => void;
+  resetState: () => void;
 };
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -61,24 +63,21 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    if (messages.length === 0) {
+    if (messages.length === 0 || !threadId) {
       return;
     }
 
-    async function saveMessages() {
-      const mappedMessages = messages.map((message) => ({
-        id: message.id,
-        createdAt: message.createdAt!,
-        role: message.role,
-        content: message.content,
-        threadId,
-      }));
-      await upsertMessages(mappedMessages);
-    }
-    saveMessages();
-  }, [messages]);
+    const mappedMessages = messages.map((message) => ({
+      id: message.id,
+      createdAt: message.createdAt!,
+      role: message.role,
+      content: message.content,
+      threadId,
+    }));
+    upsertMessages(mappedMessages);
+  }, [messages, threadId]);
 
-  const handleSubmitForm = async (e: any) => {
+  const handleSubmitForm: UseChatHelpers["handleSubmit"] = async (e) => {
     if (!threadId) {
       const id = await addThread({
         created_at: new Date(),
