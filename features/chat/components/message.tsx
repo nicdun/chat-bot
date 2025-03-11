@@ -47,9 +47,7 @@ export function Message({ message }: { message: Message }) {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
         className={`prose dark:prose-invert prose-pre:bg-transparent max-w-[calc(100%-24px)] prose-pre:p-0 rounded-lg ${
-          message.role === "user"
-            ? "bg-secondary text-white px-3 py-1 "
-            : "bg-none grow"
+          message.role === "user" ? "bg-secondary px-3 py-1 " : "bg-none grow"
         }`}
       >
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
