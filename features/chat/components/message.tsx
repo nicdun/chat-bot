@@ -10,15 +10,17 @@ import remarkGfm from "remark-gfm";
 
 export function Message({ message }: { message: Message }) {
   const components: Partial<Components> = {
-    code: ({ node, inline, className, children, ...props }) => {
+    // Prevent giving ref to syntax highlighter component. See: https://github.com/remarkjs/react-markdown/issues/826
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    code: ({ node, className, children, ref, ...props }) => {
       const match = /language-(\w+)/.exec(className || "");
-      return !inline && match ? (
+      return match ? (
         <SyntaxHighlighter
-          style={materialDark}
           language={match[1]}
           PreTag="div"
           className="not-prose rounded-lg"
           {...props}
+          style={materialDark}
         >
           {String(children).replace(/\n$/, "")}
         </SyntaxHighlighter>
