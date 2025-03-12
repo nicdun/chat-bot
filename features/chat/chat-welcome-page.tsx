@@ -8,7 +8,7 @@ export function WelcomePage() {
 
   useEffect(() => {
     resetState();
-  }, [resetState]);
+  }, []);
 
   return (
     <main className="flex-1 h-full flex flex-col">

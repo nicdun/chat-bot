@@ -34,7 +34,7 @@ export function ChatPage() {
     };
 
     getInitialMessages();
-  }, [setMessages, setThreadId, threadId]);
+  }, [threadId]);
 
   return (
     <main className="flex-1 h-full flex flex-col">
