@@ -7,7 +7,7 @@ import { WelcomePage } from "./chat-welcome-page";
 import { ChatProvider } from "./context/chat-context";
 import { AppSidebar } from "@/features/chat/components/app-sidebar";
 
-export function ChatRoot() {
+export default function ChatRoot() {
   return (
     <BrowserRouter>
       <SidebarProvider>
