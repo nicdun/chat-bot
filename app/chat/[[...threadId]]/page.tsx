@@ -1,5 +1,5 @@
-import { ChatRoot } from "@/features/chat/chat-root";
+import ChatWrapper from "./chat-wrapper";
 
 export default async function Home() {
-  return <ChatRoot />;
+  return <ChatWrapper />;
 }
