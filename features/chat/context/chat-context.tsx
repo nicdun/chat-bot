@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router";
 import { upsertMessages } from "../db/messages";
 import { addThread } from "../db/threads";
+import { db } from "../db/index-db-adapter";
 
 type ChatContextType = {
   messages: any[];
@@ -73,7 +74,13 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         content: message.content,
         threadId,
       }));
-      await upsertMessages(mappedMessages);
+
+      const settings = await db.settings.get("settings");
+      const storeInDb = settings ? settings.storeInDb : false;
+
+      if (storeInDb) {
+        await upsertMessages(mappedMessages);
+      }
     }
     saveMessages();
   }, [messages]);
