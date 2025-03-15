@@ -29,7 +29,7 @@ markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 mdurl==0.1.2
 multidict==6.1.0
-numpy==2.2.2
+numpy==2.2.3
 ollama==0.4.7
 orjson==3.10.15
 packaging==24.2
