@@ -34,7 +34,7 @@
     "zod": "3.24.2"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "3.2.0",
+    "@eslint/eslintrc": "3.3.0",
     "@tailwindcss/postcss": "4.0.14",
     "@tailwindcss/typography": "0.5.16",
     "@types/node": "20.17.24",
