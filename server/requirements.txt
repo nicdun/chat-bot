@@ -35,7 +35,7 @@ orjson==3.10.15
 packaging==24.2
 propcache==0.3.0
 pydantic==2.10.6
-pydantic-core==2.27.2
+pydantic-core==2.32.0
 pydantic-settings
 Pygments==2.19.1
 python-dotenv==1.0.1
