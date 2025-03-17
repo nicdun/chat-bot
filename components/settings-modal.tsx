@@ -19,8 +19,8 @@ interface SettingsModal {
 }
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModal) {
-  const settings = useLiveQuery(() => db.settings.toArray(), []);
-  const storeInDb = settings?.[0]?.storeInDb ?? false;
+  const settings = useLiveQuery(() => db.settings.get("settings"), []);
+  const storeInDb = settings?.storeInDb ?? false;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
