@@ -9,9 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { db } from "@/features/chat/db/index-db-adapter";
+import { useDataContext } from "@/features/chat/context/data-context";
 import { updateSettings } from "@/features/chat/db/settings";
-import { useLiveQuery } from "dexie-react-hooks";
 
 interface SettingsModal {
   isOpen: boolean;
@@ -19,8 +18,8 @@ interface SettingsModal {
 }
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModal) {
-  const settings = useLiveQuery(() => db.settings.get("settings"), []);
-  const storeInDb = settings?.storeInDb ?? false;
+  const { settings } = useDataContext();
+  const storeInDb = settings.storeInDb;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

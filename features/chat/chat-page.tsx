@@ -3,11 +3,12 @@ import Chat from "@/features/chat/components/chat";
 import { useEffect } from "react";
 import { useParams } from "react-router";
 import { useChatContext } from "./context/chat-context";
-import { db } from "./db/index-db-adapter";
+import { useDataContext } from "./context/data-context";
 
 export function ChatPage() {
   const { threadId } = useParams();
   const { setThreadId, setMessages } = useChatContext();
+  const { messages } = useDataContext();
 
   useEffect(() => {
     if (!threadId) {
@@ -18,8 +19,6 @@ export function ChatPage() {
     setThreadId(threadId);
 
     const getInitialMessages = async () => {
-      const messages = await db.messages.toArray();
-
       const mappedMessages = messages
         .filter((message) => message.threadId === threadId)
         .map((message) => ({

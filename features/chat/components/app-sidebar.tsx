@@ -1,6 +1,5 @@
 "use client";
 
-import { useLiveQuery } from "dexie-react-hooks";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -23,21 +22,21 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { SidebarThemeToggle } from "../../../components/sidebar-theme-toggle";
-import { db } from "@/features/chat/db/index-db-adapter";
 import SettingsButton from "@/components/settings-button";
+import { useDataContext } from "../context/data-context";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const threads = useLiveQuery(() => db.threads.toArray(), []);
+
+  const { threads, deleteThread } = useDataContext();
 
   const handleNewChat = () => {
     navigate(`/chat`);
   };
 
   const handleDeleteThread = async (threadId: string) => {
-    await db.threads.delete(threadId);
-    await db.messages.where("threadId").equals(threadId).delete();
+    await deleteThread(threadId);
     navigate(`/chat`);
   };
 

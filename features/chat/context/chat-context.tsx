@@ -9,9 +9,7 @@ import {
   useState,
 } from "react";
 import { useNavigate } from "react-router";
-import { upsertMessages } from "../db/messages";
-import { addThread } from "../db/threads";
-import { db } from "../db/index-db-adapter";
+import { useDataContext } from "./data-context";
 
 type ChatContextType = Pick<
   UseChatHelpers,
@@ -36,6 +34,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const [threadId, setThreadId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { addThread, upsertMessages } = useDataContext();
 
   const {
     messages,
@@ -77,12 +76,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         threadId,
       }));
 
-      const settings = await db.settings.get("settings");
-      const storeInDb = settings ? settings.storeInDb : false;
-
-      if (storeInDb) {
-        await upsertMessages(mappedMessages);
-      }
+      await upsertMessages(mappedMessages);
     }
     saveMessages();
   }, [messages, threadId]);

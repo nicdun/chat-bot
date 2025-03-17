@@ -8,6 +8,7 @@ import { WelcomePage } from "@/features/chat/chat-welcome-page";
 import { ChatPage } from "@/features/chat/chat-page";
 import { ChatProvider } from "@/features/chat/context/chat-context";
 import { Toaster } from "@/components/ui/toaster";
+import { DataProvider } from "@/features/chat/context/data-context";
 
 const BrowserRouter = dynamic(
   () => import("react-router").then((mod) => mod.BrowserRouter),
@@ -21,23 +22,26 @@ export default function ClientLayout({
 }>) {
   return (
     <BrowserRouter>
-      <SidebarProvider>
-        <div className="w-full flex flex-col">
-          <div className="flex flex-1">
-            <AppSidebar />
-            <div className="flex-1">
-              <ChatProvider>
-                <Routes>
-                  <Route path="/chat" element={<WelcomePage />} />
-                  <Route path="/chat/:threadId" element={<ChatPage />} />
-                </Routes>
-              </ChatProvider>
-              {children}
-              <Toaster />
+      <DataProvider>
+        <SidebarProvider>
+          <div className="w-full flex flex-col">
+            <div className="flex flex-1">
+              <AppSidebar />
+              <div className="flex-1">
+                <ChatProvider>
+                  <Routes>
+                    <Route path="/chat" element={<WelcomePage />} />
+                    <Route path="/chat/:threadId" element={<ChatPage />} />
+                  </Routes>
+                </ChatProvider>
+
+                {children}
+                <Toaster />
+              </div>
             </div>
           </div>
-        </div>
-      </SidebarProvider>
+        </SidebarProvider>
+      </DataProvider>
     </BrowserRouter>
   );
 }

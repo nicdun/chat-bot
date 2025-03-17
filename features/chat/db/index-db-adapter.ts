@@ -47,5 +47,5 @@ db.on("populate", async () => {
   await db.settings.add(DEFAULT_SETTINGS);
 });
 
-export { db };
+export { db, DEFAULT_SETTINGS };
 export type { Message, Thread, Settings };
