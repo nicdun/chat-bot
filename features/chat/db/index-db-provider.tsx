@@ -1,6 +1,6 @@
 import { db } from "@/features/chat/db/index-db-adapter";
 import { useLiveQuery } from "dexie-react-hooks";
-import { createContext, useContext } from "react";
+import { createContext, useContext, ReactNode } from "react";
 import { Message, Thread } from "./index-db-adapter";
 
 interface DataProviderState {
@@ -8,11 +8,14 @@ interface DataProviderState {
   threads: Thread[];
 }
 
-const DataContext = createContext<DataProviderState>();
+const DataContext = createContext<DataProviderState>({
+  messages: [],
+  threads: [],
+});
 
-export const DataProvider = ({ children }) => {
-  const messages = useLiveQuery(() => db.messages.toArray(), []);
-  const threads = useLiveQuery(() => db.threads.toArray(), []);
+export const DataProvider = ({ children }: { children: ReactNode }) => {
+  const messages = useLiveQuery(() => db.messages.toArray(), []) || [];
+  const threads = useLiveQuery(() => db.threads.toArray(), []) || [];
 
   return (
     <DataContext.Provider value={{ messages, threads }}>

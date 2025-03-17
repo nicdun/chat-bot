@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
-import { db } from "./index-db-adapter";
+import { db, Thread } from "./index-db-adapter";
 
-export const addThread = async (thread: Thread) => {
+export const addThread = async (thread: Omit<Thread, "id">) => {
   const id = uuidv4();
 
   await db.threads.add({
-    id: id,
     ...thread,
+    id,
   });
 
   return id;
