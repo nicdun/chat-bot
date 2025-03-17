@@ -21,6 +21,7 @@ interface DataProviderState {
   messages: Message[];
   threads: Thread[];
   settings: Settings;
+  isLoading: boolean;
   upsertMessages: (messages: Message[]) => Promise<void>;
   addThread: (thread: Omit<Thread, "id">) => Promise<string>;
   deleteThread: (id: string) => Promise<void>;
@@ -32,10 +33,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [tempMessages, setTempMessages] = useState<Message[]>([]);
   const [tempThreads, setTempThreads] = useState<Thread[]>([]);
 
-  const dbMessages = useLiveQuery(() => db.messages.toArray(), [], []);
-  const dbThreads = useLiveQuery(() => db.threads.toArray(), [], []);
+  const dbMessages = useLiveQuery(() => db.messages.toArray(), []);
+  const dbThreads = useLiveQuery(() => db.threads.toArray(), []);
   const settings =
     useLiveQuery(() => db.settings.get("settings"), []) || DEFAULT_SETTINGS;
+
+  const isLoading = !dbMessages || !dbThreads;
 
   const storeInDb = settings.storeInDb;
 
@@ -53,8 +56,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         setTempThreads([]);
       } else {
         // IndexedDB -> RAM
-        setTempMessages(dbMessages);
-        setTempThreads(dbThreads);
+        setTempMessages(dbMessages || []);
+        setTempThreads(dbThreads || []);
         await db.messages.clear();
         await db.threads.clear();
       }
@@ -110,6 +113,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         messages: storeInDb ? dbMessages || [] : tempMessages,
         threads: storeInDb ? dbThreads || [] : tempThreads,
         settings: settings,
+        isLoading,
         upsertMessages,
         addThread,
         deleteThread,
