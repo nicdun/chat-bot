@@ -30,6 +30,16 @@ export function Message({ message }: { message: Message }) {
         </code>
       );
     },
+    a: ({ node, children, ...props }) => (
+      <a
+        {...props}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 underline"
+      >
+        {children}
+      </a>
+    ),
   };
 
   return (
