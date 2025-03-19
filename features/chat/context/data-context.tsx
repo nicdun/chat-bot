@@ -13,8 +13,16 @@ import {
   useEffect,
 } from "react";
 import { Message, Thread } from "../db/index-db-adapter";
-import { upsertMessages as dbUpsertMessages } from "../db/messages";
-import { addThread as dbAddThread } from "../db/threads";
+import {
+  upsertMessages as dbUpsertMessages,
+  deleteMessages,
+  deleteMessagesByThreadId,
+} from "../db/messages";
+import {
+  addThread as dbAddThread,
+  deleteThreads,
+  upsertThreads,
+} from "../db/threads";
 import { usePrevious } from "@/lib/utils";
 
 interface DataProviderState {
@@ -48,18 +56,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     const migrateData = async () => {
       if (storeInDb) {
         // RAM -> IndexedDB
-        await db.messages.clear();
-        await db.threads.clear();
-        await db.messages.bulkAdd(tempMessages);
-        await db.threads.bulkAdd(tempThreads);
+        await deleteMessages();
+        await deleteThreads();
+        await dbUpsertMessages(tempMessages);
+        await upsertThreads(tempThreads);
         setTempMessages([]);
         setTempThreads([]);
       } else {
         // IndexedDB -> RAM
         setTempMessages(dbMessages || []);
         setTempThreads(dbThreads || []);
-        await db.messages.clear();
-        await db.threads.clear();
+        await deleteMessages();
+        await deleteThreads();
       }
     };
 
@@ -97,8 +105,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   const deleteThread = async (id: string) => {
     if (storeInDb) {
-      await db.threads.delete(id);
-      await db.messages.where("threadId").equals(id).delete();
+      deleteThread(id);
+      await deleteMessagesByThreadId(id);
     } else {
       setTempThreads((prev) => prev.filter((thread) => thread.id !== id));
       setTempMessages((prev) =>
