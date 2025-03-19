@@ -1,5 +1,9 @@
 import { db, Message } from "./index-db-adapter";
 
+export async function getMessages() {
+  return db.messages.toArray();
+}
+
 export async function upsertMessages(messages: Message[]) {
   const existingMessages = await db.messages.bulkGet(messages.map((m) => m.id));
   const messagesToUpdate = messages.filter((m, i) => existingMessages[i]);

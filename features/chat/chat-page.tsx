@@ -3,29 +3,30 @@ import Chat from "@/features/chat/components/chat";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useChatContext } from "./context/chat-context";
-import { useDataContext } from "./context/data-context";
+import { getMessages } from "./db/messages";
+import { getThreads } from "./db/threads";
 
 export function ChatPage() {
   const { threadId } = useParams();
   const navigate = useNavigate();
-  const { setThreadId, setMessages } = useChatContext();
-  const { isLoading, messages, threads } = useDataContext();
+  const { setThreadId, setMessages, isLoading } = useChatContext();
 
   useEffect(() => {
     if (isLoading || !threadId) {
       return;
     }
 
-    const threadExists = !!threads.find((thread) => thread.id === threadId);
-    if (!threadExists) {
-      navigate("/chat", { replace: true });
-      return;
-    }
+    const initializeChatContext = async () => {
+      const threads = await getThreads();
 
-    // Update thread ID in context
-    setThreadId(threadId);
+      const threadExists = !!threads.find((thread) => thread.id === threadId);
+      if (!threadExists) {
+        navigate("/chat", { replace: true });
+        return;
+      }
 
-    const getInitialMessages = async () => {
+      const messages = await getMessages();
+
       const mappedMessages = messages
         .filter((message) => message.threadId === threadId)
         .map((message) => ({
@@ -36,11 +37,12 @@ export function ChatPage() {
         }))
         .sort((a, b) => a.createdAt!.getTime() - b.createdAt!.getTime());
 
+      setThreadId(threadId);
       setMessages(mappedMessages);
     };
 
-    getInitialMessages();
-  }, [threadId, isLoading]);
+    initializeChatContext();
+  }, [threadId]);
 
   return (
     <main className="flex-1 h-full flex flex-col">
