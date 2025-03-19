@@ -29,7 +29,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModal) {
           <DialogDescription></DialogDescription>
         </DialogHeader>
         <div className="flex flex-row justify-between h-full px-6 pb-4">
-          <Label htmlFor="storage">Store data locally in Browser</Label>
+          <Label htmlFor="storage">Store data locally in browser</Label>
           <Switch
             checked={storeInDb}
             onCheckedChange={() => {
