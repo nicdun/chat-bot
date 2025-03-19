@@ -20,7 +20,8 @@ import {
 } from "../db/messages";
 import {
   addThread as dbAddThread,
-  deleteThreads,
+  deleteThread as dbDeleteThread,
+  deleteThreads as dbDeleteThreads,
   upsertThreads,
 } from "../db/threads";
 import { usePrevious } from "@/lib/utils";
@@ -57,7 +58,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       if (storeInDb) {
         // RAM -> IndexedDB
         await deleteMessages();
-        await deleteThreads();
+        await dbDeleteThreads();
         await dbUpsertMessages(tempMessages);
         await upsertThreads(tempThreads);
         setTempMessages([]);
@@ -67,7 +68,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         setTempMessages(dbMessages || []);
         setTempThreads(dbThreads || []);
         await deleteMessages();
-        await deleteThreads();
+        await dbDeleteThreads();
       }
     };
 
@@ -105,7 +106,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   const deleteThread = async (id: string) => {
     if (storeInDb) {
-      deleteThread(id);
+      await dbDeleteThread(id);
       await deleteMessagesByThreadId(id);
     } else {
       setTempThreads((prev) => prev.filter((thread) => thread.id !== id));
