@@ -1,7 +1,13 @@
 "use client";
 import { useToast } from "@/hooks/use-toast";
 import { useChat, UseChatHelpers } from "@ai-sdk/react";
-import { ReactNode, createContext, useContext, useState } from "react";
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useNavigate } from "react-router";
 import { useDataContext } from "./data-context";
 
@@ -27,6 +33,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const [threadId, setThreadId] = useState<string | null>(null);
+  const [canSave, setCanSave] = useState(false);
   const navigate = useNavigate();
   const { addThread, upsertMessages } = useDataContext();
 
@@ -55,25 +62,32 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       }
     },
     onFinish: () => {
-      saveMessages();
+      setCanSave(true);
     },
   });
 
-  async function saveMessages() {
-    if (messages.length === 0 || !threadId) {
-      return;
+  useEffect(() => {
+    async function saveMessages() {
+      if (messages.length === 0 || !threadId) {
+        return;
+      }
+
+      const mappedMessages = messages.map((message) => ({
+        id: message.id,
+        createdAt: message.createdAt!,
+        role: message.role,
+        content: message.content,
+        threadId,
+      }));
+
+      await upsertMessages(mappedMessages);
     }
 
-    const mappedMessages = messages.map((message) => ({
-      id: message.id,
-      createdAt: message.createdAt!,
-      role: message.role,
-      content: message.content,
-      threadId,
-    }));
-
-    await upsertMessages(mappedMessages);
-  }
+    if (canSave) {
+      saveMessages();
+      setCanSave(false);
+    }
+  }, [messages, canSave]);
 
   const handleSubmitForm: UseChatHelpers["handleSubmit"] = async (e) => {
     if (!threadId) {
