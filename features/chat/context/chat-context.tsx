@@ -1,13 +1,7 @@
 "use client";
 import { useToast } from "@/hooks/use-toast";
 import { useChat, UseChatHelpers } from "@ai-sdk/react";
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { ReactNode, createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router";
 import { useDataContext } from "./data-context";
 
@@ -60,26 +54,26 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         });
       }
     },
+    onFinish: () => {
+      saveMessages();
+    },
   });
 
-  useEffect(() => {
-    async function saveMessages() {
-      if (messages.length === 0 || !threadId) {
-        return;
-      }
-
-      const mappedMessages = messages.map((message) => ({
-        id: message.id,
-        createdAt: message.createdAt!,
-        role: message.role,
-        content: message.content,
-        threadId,
-      }));
-
-      await upsertMessages(mappedMessages);
+  async function saveMessages() {
+    if (messages.length === 0 || !threadId) {
+      return;
     }
-    saveMessages();
-  }, [messages, threadId]);
+
+    const mappedMessages = messages.map((message) => ({
+      id: message.id,
+      createdAt: message.createdAt!,
+      role: message.role,
+      content: message.content,
+      threadId,
+    }));
+
+    await upsertMessages(mappedMessages);
+  }
 
   const handleSubmitForm: UseChatHelpers["handleSubmit"] = async (e) => {
     if (!threadId) {
