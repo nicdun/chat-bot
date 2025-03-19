@@ -1,13 +1,27 @@
-import { v4 as uuidv4 } from "uuid";
 import { db, Thread } from "./index-db-adapter";
 
-export const addThread = async (thread: Omit<Thread, "id">) => {
-  const id = uuidv4();
-
-  await db.threads.add({
-    ...thread,
-    id,
-  });
-
-  return id;
+export const addThread = async (thread: Thread) => {
+  await db.threads.add(thread);
 };
+
+export const upsertThreads = async (threads: Thread[]) => {
+  const existingThreads = await db.threads.bulkGet(threads.map((t) => t.id));
+  const threadsToUpdate = threads.filter((_, i) => existingThreads[i]);
+  const threadsToAdd = threads.filter((_, i) => !existingThreads[i]);
+
+  if (threadsToUpdate.length > 0) {
+    await db.threads.bulkPut(threadsToUpdate);
+  }
+
+  if (threadsToAdd.length > 0) {
+    await db.threads.bulkAdd(threadsToAdd);
+  }
+};
+
+export async function deleteThread(id: string) {
+  await db.threads.delete(id);
+}
+
+export async function deleteThreads() {
+  await db.threads.clear();
+}

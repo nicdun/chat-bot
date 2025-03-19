@@ -13,3 +13,11 @@ export async function upsertMessages(messages: Message[]) {
     await db.messages.bulkAdd(messagesToAdd);
   }
 }
+
+export async function deleteMessagesByThreadId(threadId: string) {
+  await db.messages.where("threadId").equals(threadId).delete();
+}
+
+export async function deleteMessages() {
+  await db.messages.clear();
+}
