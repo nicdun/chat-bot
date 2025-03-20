@@ -1,0 +1,37 @@
+# name: Run frontend tests
+# description: Run the frontend tests using npm
+#
+# inputs:
+#   react_app_password:
+#     description: "The password for the FE user"
+#     required: true
+#
+# outputs: {}
+#
+# runs:
+#   using: "composite"
+#   steps:
+#     - name: Checkout repo
+#       uses: actions/checkout@v4
+#
+#     - name: Setup node
+#       uses: actions/setup-node@v4
+#       with:
+#         node-version: '20'
+#         cache: 'npm'
+#         cache-dependency-path: ./frontend/package.json
+#
+#     - name: Install app
+#       working-directory: ./frontend
+#       shell: bash
+#       run: npm install
+#
+#     - name: Run tests
+#       working-directory: ./frontend
+#       shell: bash
+#       run: npm test src
+#       env:
+#         REACT_APP_BACKOFFICE: true
+#         REACT_APP_CUSTOM_CHAT: true
+#         REACT_APP_USERNAME: web-admin
+#         REACT_APP_PASSWORD: ${{ inputs.react_app_password }}

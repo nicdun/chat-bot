@@ -1,0 +1,14 @@
+name: Test, build and push docker images for AskSenacor and its admin page (staging)
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+
+jobs:
+  build-stage-develop:
+    uses: ./.github/workflows/_subflow_build_stage.yml
+    with:
+      docker_image_tag: "SNAPSHOT"
+    secrets: inherit

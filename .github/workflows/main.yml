@@ -1,0 +1,16 @@
+# name: build and push docker images for AskSenacor  (release)
+name: build and push docker images for AskSenacor
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+
+jobs:
+  build-stage-main:
+    uses: ./.github/workflows/_subflow_build_stage.yml
+    with:
+      docker_image_tag: "SNAPSHOT"
+      # docker_image_tag: "RELEASE"
+    secrets: inherit

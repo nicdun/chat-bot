@@ -1,0 +1,56 @@
+name: Build AskSenacor image
+description: Build, tag, push an AskSenacor image
+
+inputs:
+  prepare_script:
+    description: "The script to be run to prepare the build"
+    required: false
+    default: ""
+  docker_container_registry:
+    description: "The url to the Docker registry."
+    required: true
+  docker_file:
+    description:  "The path to the Docker file to be used."
+    required: true
+  docker_image_name:
+    description: "The name of the built image."
+    required: true
+  docker_image_tag:
+    description: "The tag of the built image."
+    required: true
+  docker_login_name:
+    description: "THe login name for the docker registry"
+    required: true
+  docker_login_password:
+    description: "THe login password for the docker registry"
+    required: true
+outputs: {}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Prepare build
+      if: ${{ inputs.prepare_script }} !== ""
+      shell: bash
+      run: bash ${{ inputs.prepare_script }}
+
+    - name: Build Docker image
+      shell: bash
+      env:
+        DOCKER_FILE: ${{ inputs.docker_file }}
+        DOCKER_IMAGE: ${{ inputs.docker_image_name }}
+        DOCKER_TAG: ${{ inputs.docker_image_tag }}
+      run: bash .github/scripts/build_docker.sh
+
+    - name: Push Docker image
+      shell: bash
+      env:
+        DOCKER_CONTAINER_REGISTRY: ${{ inputs.docker_container_registry }}
+        DOCKER_IMAGE: ${{ inputs.docker_image_name }}
+        DOCKER_TAG: ${{ inputs.docker_image_tag }}
+        DOCKER_LOGIN_NAME: ${{ inputs.docker_login_name }}
+        DOCKER_LOGIN_PASSWORD: ${{ inputs.docker_login_password }}
+      run: bash .github/scripts/push_docker.sh

@@ -1,0 +1,100 @@
+name: 
+  Build and push docker images for AskSenacor-Frontend.
+  Sub-workflow to not duplicate secrets/vars block for main + develop.
+
+on:
+  workflow_call:
+    inputs:
+      docker_image_tag:
+        required: true
+        type: string
+
+
+jobs:
+  # run-backend-tests:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Run tests
+  #       uses: ./.github/actions/test-backend
+  #       with:
+  #         confluence_url: ${{ vars.CONFLUENCE_URL }}
+  #         confluence_username: ${{ secrets.CONFLUENCE_USERNAME }}
+  #         confluence_api_key: ${{ secrets.CONFLUENCE_API_KEY }}
+  #         azure_search_endpoint: ${{ secrets.AZURE_SEARCH_ENDPOINT }}
+  #         azure_search_admin_key: ${{ secrets.AZURE_SEARCH_ADMIN_KEY }}
+  #         azure_search_embedding: ${{ secrets.AZURE_SEARCH_EMBEDDING }}
+  #         azure_search_embedding_api_version: ${{ secrets.AZURE_SEARCH_EMBEDDING_API_VERSION }}
+  #         azure_openai_api_key: ${{ secrets.AZURE_OPENAI_API_KEY }}
+  #         azure_openai_endpoint: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+  #         azure_openai_deployment: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+  #         azure_openai_deployment_api_version: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_API_VERSION }}
+
+  # run-frontend-tests:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Run frontend tests
+  #       uses: ./.github/actions/test-frontend
+  #       with:
+  #         react_app_password: ${{ secrets.REACT_APP_PASSWORD }}
+
+  # build-flask:
+  #   needs: [run-backend-tests, run-frontend-tests]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v4
+  #
+  #     - name: build and push Docker image for flask server
+  #       uses: ./.github/actions/build-image
+  #       with:
+  #         docker_file: "docker/Dockerfile-flask"
+  #         docker_image_name: "asksenacor-server"
+  #         docker_image_tag: ${{ inputs.docker_image_tag }}
+  #         docker_container_registry: ${{ secrets.DOCKER_REGISTRY_URL }}
+  #         docker_login_name: ${{ secrets.DOCKER_LOGIN_NAME }}
+  #         docker_login_password: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
+
+  # build-react-admin:
+  #   needs: [run-backend-tests, run-frontend-tests]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v4
+  #
+  #     - name: build and push Docker image for react frontend (backoffice)
+  #       uses: ./.github/actions/build-image
+  #       with:
+  #         prepare_script: frontend/scripts/prepareBackofficeBuild.sh
+  #         docker_file: "docker/Dockerfile-react"
+  #         docker_image_name: "asksenacor-frontend-admin"
+  #         docker_image_tag: ${{ inputs.docker_image_tag }}
+  #         docker_container_registry: ${{ secrets.DOCKER_REGISTRY_URL }}
+  #         docker_login_name: ${{ secrets.DOCKER_LOGIN_NAME }}
+  #         docker_login_password: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
+
+
+    # needs: [run-backend-tests, run-frontend-tests]
+  # build-react-chat:
+  build-nextjs-chat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: build and push Docker image for frontend (chat) AskSenacor-Frontend-nextjs
+        uses: ./.github/actions/build-image
+        with:
+          # prepare_script: frontend/scripts/prepareChatBuild.sh
+          docker_file: "docker/Dockerfile-nextjs"
+          # docker_image_name: "asksenacor-frontend"
+          docker_image_name: "asksenacor-frontend-nextjs"
+          docker_image_tag: ${{ inputs.docker_image_tag }}
+          docker_container_registry: ${{ secrets.DOCKER_REGISTRY_URL }}
+          docker_login_name: ${{ secrets.DOCKER_LOGIN_NAME }}
+          docker_login_password: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
