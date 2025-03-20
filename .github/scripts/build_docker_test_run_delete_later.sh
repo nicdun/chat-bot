@@ -1,5 +1,5 @@
 #!/bin/bash
-DOCKER_IMAGE="asksenacor-frontend-nextjs"
+DOCKER_IMAGE="asksenacor-client-webapp"
 DOCKER_TAG="SNAPSHOT"
 DOCKER_FILE="docker/Dockerfile-nextjs"
 
