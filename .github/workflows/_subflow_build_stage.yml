@@ -93,7 +93,7 @@ jobs:
           # prepare_script: frontend/scripts/prepareChatBuild.sh
           docker_file: "docker/Dockerfile-nextjs"
           # docker_image_name: "asksenacor-frontend"
-          docker_image_name: "asksenacor-frontend-nextjs"
+          docker_image_name: "asksenacor-client-webapp"
           docker_image_tag: ${{ inputs.docker_image_tag }}
           docker_container_registry: ${{ secrets.DOCKER_REGISTRY_URL }}
           docker_login_name: ${{ secrets.DOCKER_LOGIN_NAME }}
