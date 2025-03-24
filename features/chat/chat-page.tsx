@@ -27,7 +27,7 @@ export function ChatPage() {
           setCurrentThreadId(threadId);
           setThreadIds(dbThreads.map((t) => t.id));
         } else {
-          navigate("/chat");
+          navigate("/chat", { replace: true });
         }
       }
     }
