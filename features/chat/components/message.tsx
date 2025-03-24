@@ -18,7 +18,7 @@ export function Message({ message }: { message: Message }) {
         <SyntaxHighlighter
           language={match[1]}
           PreTag="div"
-          className="not-prose rounded-lg"
+          className="not-prose rounded-lg w-full"
           {...props}
           style={materialDark}
         >

@@ -33,7 +33,7 @@ export default function ChatContainer({
   const [isLlmInfoModalOpen, setIsLlmInfoModalOpen] = useState(false);
 
   return (
-    <div className="flex flex-col min-w-0 h-[calc(100dvh-28px)] px-2 pt-2 md:pt-0 bg-background items-center">
+    <div className="flex flex-col min-w-0 h-[calc(100dvh-28px)] px-2 pt-2 md:pt-0 bg-background items-center max-w-screen">
       <div className="flex-1 overflow-y-scroll pt-4 min-w-0 w-full">
         <div
           ref={containerObserverRef}
