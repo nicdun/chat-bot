@@ -6,24 +6,31 @@ import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useToast } from "@/hooks/use-toast";
 import { OctagonX, Send } from "lucide-react";
 import { LoadingMessage } from "../../../components/loading";
-import { useChatContext } from "../context/chat-context";
 import { Message } from "./message";
 import { Preview } from "./preview";
-import { useState } from "react";
 import { LlmInfoModal } from "./llm-info-modal";
+import { useState } from "react";
+import { UseChatHelpers } from "@ai-sdk/react";
 
-export default function Chat() {
+type ChatContainerType = Pick<
+  UseChatHelpers,
+  "messages" | "isLoading" | "input" | "handleInputChange" | "stop"
+> & {
+  handleSubmitForm: UseChatHelpers["handleSubmit"];
+};
+
+export default function ChatContainer({
+  messages,
+  isLoading,
+  handleSubmitForm,
+  handleInputChange,
+  input,
+  stop,
+}: ChatContainerType) {
   const { toast } = useToast();
+
   const [containerObserverRef, messagesEndRef] = useScrollToBottom();
   const [isLlmInfoModalOpen, setIsLlmInfoModalOpen] = useState(false);
-  const {
-    messages,
-    isLoading,
-    input,
-    handleInputChange,
-    handleSubmitForm,
-    stop,
-  } = useChatContext();
 
   return (
     <div className="flex flex-col min-w-0 h-[calc(100dvh-28px)] px-2 pt-2 md:pt-0 bg-background items-center">

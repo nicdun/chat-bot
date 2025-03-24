@@ -1,5 +1,9 @@
 import { db, Message } from "./index-db-adapter";
 
+export async function getMessages() {
+  return db.messages.toArray();
+}
+
 export async function upsertMessages(messages: Message[]) {
   const existingMessages = await db.messages.bulkGet(messages.map((m) => m.id));
   const messagesToUpdate = messages.filter((m, i) => existingMessages[i]);
@@ -12,6 +16,10 @@ export async function upsertMessages(messages: Message[]) {
   if (messagesToAdd.length > 0) {
     await db.messages.bulkAdd(messagesToAdd);
   }
+}
+
+export async function saveMessage(message: Message) {
+  await db.messages.add(message);
 }
 
 export async function deleteMessagesByThreadId(threadId: string) {

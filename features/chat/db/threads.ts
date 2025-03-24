@@ -1,5 +1,9 @@
 import { db, Thread } from "./index-db-adapter";
 
+export const getThreads = async () => {
+  return db.threads.toArray();
+};
+
 export const addThread = async (thread: Thread) => {
   await db.threads.add(thread);
 };
