@@ -18,6 +18,10 @@ export async function upsertMessages(messages: Message[]) {
   }
 }
 
+export async function saveMessage(message: Message) {
+  await db.messages.add(message);
+}
+
 export async function deleteMessagesByThreadId(threadId: string) {
   await db.messages.where("threadId").equals(threadId).delete();
 }

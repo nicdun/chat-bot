@@ -4,7 +4,6 @@ import {
   Settings,
 } from "@/features/chat/db/index-db-adapter";
 import { useLiveQuery } from "dexie-react-hooks";
-import { v4 as uuidv4 } from "uuid";
 import {
   createContext,
   useContext,
@@ -31,8 +30,9 @@ interface DataProviderState {
   threads: Thread[];
   settings: Settings;
   isLoading: boolean;
+  saveMessage: (message: Message) => Promise<void>;
   upsertMessages: (messages: Message[]) => Promise<void>;
-  addThread: (thread: Omit<Thread, "id">) => Promise<string>;
+  addThread: (thread: Thread) => Promise<void>;
   deleteThread: (id: string) => Promise<void>;
 }
 
@@ -94,14 +94,26 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const addThread = async (thread: Omit<Thread, "id">) => {
-    const id = uuidv4();
+  const saveMessage = async (message: Message) => {
+    const messageExists = (storeInDb ? dbMessages || [] : tempMessages).find(
+      (m) => m.id === message.id
+    );
+
+    if (messageExists) return;
+
     if (storeInDb) {
-      await dbAddThread({ ...thread, id });
+      await db.messages.add(message);
     } else {
-      setTempThreads((prev) => [...prev, { ...thread, id }]);
+      setTempMessages((prev) => [...prev, message]);
     }
-    return id;
+  };
+
+  const addThread = async (thread: Thread) => {
+    if (storeInDb) {
+      await dbAddThread(thread);
+    } else {
+      setTempThreads((prev) => [...prev, { ...thread }]);
+    }
   };
 
   const deleteThread = async (id: string) => {
@@ -123,6 +135,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         threads: storeInDb ? dbThreads || [] : tempThreads,
         settings: settings,
         isLoading,
+        saveMessage,
         upsertMessages,
         addThread,
         deleteThread,
