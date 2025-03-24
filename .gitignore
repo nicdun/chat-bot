@@ -1,0 +1,10 @@
+.DS_Store
+chatbot/
+**/__pycache__/
+
+node_modules/
+.vscode/
+.next/
+.cursor/
+.env
+.env.local
